@@ -836,3 +836,9 @@ undeveloped
 0.0002
 emerald
 0.0001
+who
+0.1357
+his
+0.2695
+led
+0.0110

@@ -1,21 +1,44 @@
-el que: he who
-la vida: life
-dejar de: quit, stop
-de forma ADJ: ADJly
-de una manera ADJ: ADJly
-en su lugar: instead
-de aspecto ADJ: ADJ-looking
-que llevaba: wearing
-que recordaban: recalling
-de montura cuadrada: square-framed
-más ADJ: ADJer
-al menos: at least
-negro azabache: jet black
-se dio la vuelta: turned
-por supuesto: of course
-debían de: (they) must have
-la vida futura: the afterlife
-proceder de: come from
-NOUN de NOUN: NOUN NOUN (ex: cubo de metal, metal bucket)
-sin embargo: however, but, nevertheless
-hecho de: made of
+el que
+he who
+la vida
+life
+dejar de
+stop
+en su lugar
+instead
+de montura cuadrada
+square-framed
+al menos
+at least
+se dio la vuelta
+turned
+por supuesto
+of course
+debían de
+should have
+la vida futura
+the afterlife
+proceder de
+come from
+sin embargo
+however
+hecho de
+made of
+a causa de
+because of
+ya que
+since
+en consecuencia
+as a result
+por consiguiente
+therefore
+por eso
+therefore
+es decir
+that is to say
+o sea
+that is to say
+en cambio
+on the other hand
+a pesar de
+despite

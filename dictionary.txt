@@ -10,10 +10,9 @@ who
 1
 lee
 reads
-3
+2
 mucho 
 much 
-lot 
 a lot
 1
 y

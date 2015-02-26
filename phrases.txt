@@ -1,5 +1,5 @@
 él que
-he who
+he-who
 la vida
 life
 dejar de
@@ -9,46 +9,46 @@ instead
 de montura cuadrada
 square-framed
 al menos
-at least
+at-least
 se dio la vuelta
 turned
 por supuesto
-of course
+of-course
 debían de
-should have
+should-have
 la vida futura
-the afterlife
+the-afterlife
 proceder de
-come from
+come-from
 sin embargo
 however
 hecho de
-made of
+made-of
 a causa de
-because of
+because-of
 ya que
 since
 en consecuencia
-as a result
+as-a-result
 por consiguiente
 therefore
 por eso
 therefore
 es decir
-that is to say
+that-is-to-say
 o sea
-that is to say
+that-is-to-say
 en cambio
-on the other hand
+on-the-other-hand
 a pesar de
 despite
 en vez de
-instead of
+instead-of
 con todo
 nevertheless
 tal como
-just as
+just-as
 por lo general
 generally
 de una manera
-in a manner
+in-a-manner

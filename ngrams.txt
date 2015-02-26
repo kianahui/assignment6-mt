@@ -10,8 +10,6 @@ reads
 0.0013
 much
 0.0529
-lot
-0.0097
 a lot
 0.0069
 and

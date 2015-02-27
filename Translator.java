@@ -112,7 +112,7 @@ public class Translator {
 		return spanishTaggedSentences;
 	}
 
-	public List<String> translate(String fileStr, String spTaggerFile, List<String> newSpanishTagged, List<ArrayList<Integer>> positions) {
+	public List<String> translate(String fileStr, String spTaggerFile, List<String> newSpanishTagged) {
 		List<String> sentences = new ArrayList<String>();
 		List<String> translations = new ArrayList<String>();
 		BufferedReader br = null;
@@ -137,7 +137,7 @@ public class Translator {
 		List<String> spanishTaggedSentences = spanishPOS(phrasesReplaced, spTaggerFile);
 		for(int i = 0; i < sentences.size(); i++) {
 			// System.out.println(spanishTaggedSentences.get(i));
-			translations.add(translateLineSpanEng(phrasesReplaced.get(i), spanishTaggedSentences.get(i), newSpanishTagged, positions));
+			translations.add(translateLineSpanEng(phrasesReplaced.get(i), spanishTaggedSentences.get(i), newSpanishTagged));
 		}
 		return translations;
 	}
@@ -154,8 +154,7 @@ public class Translator {
 		}
 	}
 
-	public String translateLineSpanEng(String spReg, String spTagged, List<String> newSpanishTagged, List<ArrayList<Integer>> allPositions) {
-		ArrayList<Integer> positions = new ArrayList<Integer>();
+	public String translateLineSpanEng(String spReg, String spTagged, List<String> newSpanishTagged) {
 		// System.out.println(spReg);
 		// System.out.println(spTagged);
 		// System.out.println("-----");
@@ -202,14 +201,12 @@ public class Translator {
 				mostLikelyTrans = tokens[i];
 			}
 			finalTranslation.add(mostLikelyTrans);
-			String[] splitTrans = mostLikelyTrans.split("\\s+");
-			for (String s: splitTrans) positions.add(i);
 			if(hasComma) {
 				finalTranslation.add(",");
 			}
 		}
 		newSpanishTagged.add(spanishSentence);
-		allPositions.add(positions);
+		// allPositions.add(positions);
 		String toReturn = "";
 		for(String token : finalTranslation) {
 			toReturn += token + " ";
@@ -262,55 +259,24 @@ public class Translator {
 	}
 
 	private static List<String> cconjunctions = new ArrayList<String>(Arrays.asList("and","nor","but","or","yet"));
-	public List<String> processPOS(List<String> taggedSentences, List<String> spanishTaggedSentences, List<ArrayList<Integer>> allPositions) {
-		for (String sp: spanishTaggedSentences) System.out.println(sp);
+	public List<String> processPOS(List<String> taggedSentences) {
 		List<String> toReturn = new ArrayList<String>();
-		for(int x = 0; x < taggedSentences.size(); x++) {
-			String sent = taggedSentences.get(x);
-			// System.out.println(sent);
+		for(String sent : taggedSentences) {
 			String finalStr = "";
-
-			String[] tempTagTokens = sent.split("\\s+");
-			ArrayList<Integer> positions = allPositions.get(x);
-			String[] tTokens = new String[tempTagTokens.length];
-			int prev = -1;
-			int run = 0;
-			for (int p = 0; p < tTokens.length; p++) {
-				int index = positions.get(p);
-				if (index == prev) {
-					run++;
-					tTokens[p - run] = tTokens[p - run] + tempTagTokens[p];
-				}else {
-					tTokens[p - run] = tempTagTokens[p];
-				}
-				prev = index;
-			}
-			String[] tagTokens = new String[tempTagTokens.length - run];
-			for (int p = 0; p < tempTagTokens.length - run; p++) {
-				tagTokens[p] = tTokens[p];
-			}
-			for (String s: tempTagTokens) System.out.println(s);
-			for (String s: tagTokens) System.out.println(s);
-
-
+			String[] tagTokens = sent.split("\\s+");
 			for(int i = 0; i < tagTokens.length; i++) {
-				// System.out.println("English Tagged: " + tagTokens[i]);
 				String pos = tagTokens[i].substring(tagTokens[i].indexOf('_')+1);
-				// System.out.println(pos);
 				String actualWord = tagTokens[i].substring(0, tagTokens[i].indexOf('_'));
-				pos = checkPos(pos, i, spanishTaggedSentences.get(x));
 				if((!pos.equals("NN") && !pos.equals("NNS")) || (i == tagTokens.length-1)) {
 					finalStr += actualWord + " ";
 				} else {
 					String posNext = tagTokens[i+1].substring(tagTokens[i+1].indexOf('_')+1);
-					posNext = checkPos(posNext, i+1, spanishTaggedSentences.get(x));
 					if(posNext.equals("JJ")) {
 						int numChanged = 1;
 						boolean andFound = false;
 						List<String> adjectives = new ArrayList<String>();
 						while(numChanged+i < tagTokens.length) {
 							String posNextNext = tagTokens[i+numChanged].substring(tagTokens[i+numChanged].indexOf('_')+1);
-							posNextNext = checkPos(posNextNext, i+numChanged, spanishTaggedSentences.get(x));
 							if(!posNextNext.equals("JJ") && !posNextNext.equals("CC"))
 								break;
 							String nextActualWord = tagTokens[i+numChanged].substring(0, tagTokens[i+numChanged].indexOf('_'));
@@ -363,9 +329,6 @@ public class Translator {
 				String[] phrase = phraseCheck.split(" ");
 				String pos = sentencePos[j].substring(sentencePos[j].indexOf('_')+1);
 				if (subjectVerbs.contains(toAdd) || subjectVerbs.contains(phrase[0])) {
-				// if (pos.equals("VB") || pos.equals("VBD") || pos.equals("VBN") || pos.equals("VBP") || pos.equals("VBZ") &&
-					// ( subjectVerbs.contains(toAdd) )) {
-					// check if previous token is subject
 					if (j == 0 && !pos.equals("VBG")) {
 						toAdd = "He " + toAdd;
 					} else if (j != 0) {
@@ -382,6 +345,49 @@ public class Translator {
 			newTranslations.add(newSentence);
 			}
 		return newTranslations;
+	}
+
+	private static List<String> subjects = new ArrayList<String>(Arrays.asList("i","he","she","they","we"));
+	private static List<String> prepositions = new ArrayList<String>(Arrays.asList("of","to","on","at","for","before","past","by","on","under","below","over","above","across","through","into","towards","onto","from","off","about"));
+	private static int containsPronounToChange(String str) {
+		String[] tokens = str.split("\\s+");
+		for (int i = 0; i < tokens.length; i++) {
+			if (subjects.contains(tokens[i])) {
+				if (i != 0) {
+					if (prepositions.contains(tokens[i-1])) {
+						return i;
+					}
+				}
+			}
+		}
+		return -1;
+	}
+
+
+	public List<String> pronounAgreement(List<String> oldTranslations) {
+		List<String> translationsToReturn = new ArrayList<String>();
+		Map<String,String> pronounReplacements = new HashMap<String,String>()
+		{{
+			put("i","me");
+			put("he","him");
+			put("she","her");
+			put("they","them");
+			put("we","us");
+		}};
+		for (String translation : oldTranslations) {
+			String[] tokens = translation.split("\\s+");
+			int possibleIdx = containsPronounToChange(translation);
+			if (possibleIdx > 0) {
+				//changes it
+				tokens[possibleIdx] = pronounReplacements.get(tokens[possibleIdx]);
+			}
+			String toAdd = "";
+			for(int i = 0; i < tokens.length; i++) {
+				toAdd += tokens[i] + " ";
+			}
+			translationsToReturn.add(toAdd);
+		}
+		return translationsToReturn;
 	}
 
 	private static void outputToFile(List<String> translations, String outputFile) {
@@ -412,21 +418,17 @@ public class Translator {
 
 		t.buildDictionary(args[0], args[1]);
 		List<String> newSpanishTagged = new ArrayList<String>();
-		List<ArrayList<Integer>> positions = new ArrayList<ArrayList<Integer>>();
-		List<String> translations = t.translate(args[2], spanishTaggerFile, newSpanishTagged, positions);
-
-		// for (ArrayList<Integer> list: positions) {
-		// 	System.out.println(list);
-		// }
+		List<String> translations = t.translate(args[2], spanishTaggerFile, newSpanishTagged);
 
 		System.out.println("We're done translating!");
 		System.out.println("Tagging...");
 		translations = t.tagger(translations, englishTaggerFile);
-		translations = t.processPOS(translations, newSpanishTagged, positions);
+		translations = t.processPOS(translations);
 
 		List<String> englishTagged = t.tagger(translations, englishTaggerFile);
 		translations = t.addSubjects(translations, englishTagged);
-
+		//magic happens here
+		translations = t.pronounAgreement(translations);
 		outputToFile(translations, args[3]);
 
 		System.out.println("Final translations:");
@@ -435,9 +437,10 @@ public class Translator {
 			translation = upper + translation.substring(1);
 			translation = translation.replaceAll(" ,", ",");
 			translation = translation.replaceAll("-", " ");
+			translation = translation.trim();
+			translation += ".";
 			System.out.println(translation);
 		}
 		System.out.println("--------");
 	}
-
 }

@@ -271,3 +271,113 @@ hacer la vista gorda
 ignore
 hasta donde
 as-far-as
+hecho una hiena
+furious
+hoy mismo
+today
+justo a tiempo
+just-in-time
+llevar juntos
+be-together
+lo antes possible
+as-soon-as-possible
+llevarse bien
+get-along-well
+mayor de edad
+of-age
+menor de edad
+underage
+menos mal
+just-as-well
+mientras tanto
+in-the-meantime
+morirse de risa
+die-laughing
+morirse de hambre
+starvation
+nada del otro mundo
+nothing-special
+ni a palos
+no-way
+ni en broma
+no-way
+no dar ni golpe
+do-nothing
+no pasa nada
+no-problem
+otra vez
+again
+para diario
+everyday
+pasar por alto
+overlook
+poner a salvo
+rescue
+poner en marcha
+start
+ponerse de acuerdo
+agree
+ponerse de pie
+stand-up
+por adelantado
+beforehand
+por el contrario
+on-the-contrary
+por cierto
+by-the-way
+por el otro lado
+on-the-other-hand
+por eso
+so
+por fin
+finally
+por fortuna
+fortunately
+por la buena
+nicely
+por el momento
+for now
+por lo general
+generally
+por lo regular
+normally
+por lo tanto
+thus
+por lo visto
+apparently
+por otra parte
+on-the-other-hand
+por si acaso
+just-in-case
+por siempre
+forever
+por suerte
+luckily
+por un lado
+on-the-one-hand
+por una parte
+on-the-one-hand
+primero que nada
+most-of-all
+que te mueres
+fantastic
+querer decir
+mean
+rumbo a
+toward
+según dice
+according-to
+sin duda
+without-a-doubt
+tal vez
+probably
+tarde o temprano
+sooner-or-later
+todo el mundo
+everyone
+tomar en cuenta
+bear-in-mind
+una y otra vez
+again-and-again
+ya que
+since

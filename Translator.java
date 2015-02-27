@@ -347,7 +347,64 @@ public class Translator {
 		return toReturn;
 	}
 
-	//ARGUMENTS: corpus file, ngrams file, file to translate
+	private List<String> addSubjects (List<String> translations, List<String> englishTagged) {
+		List<String> subjectVerbs = new ArrayList<String>(Arrays.asList("are", "is", "had", "have", "were", "was", "am", "has", "should", "must", "could", "would"));
+		List<String> exceptions = new ArrayList<String>(Arrays.asList("here", "there", "that", "should", "would", "could", "had", "has", "not"));
+		List<String> newTranslations = new ArrayList<String>();
+		for (int i = 0; i < translations.size(); i++) {
+			String newSentence = "";
+			String[] tokens = translations.get(i).split(" ");
+			String[] sentencePos = englishTagged.get(i).split(" ");
+
+			// iterate through every token in the sentence to search for our verbs
+			for (int j = 0; j < tokens.length; j++) {
+				String toAdd = tokens[j];
+				String phraseCheck = toAdd.replaceAll("-", " ");
+				String[] phrase = phraseCheck.split(" ");
+				String pos = sentencePos[j].substring(sentencePos[j].indexOf('_')+1);
+				if (subjectVerbs.contains(toAdd) || subjectVerbs.contains(phrase[0])) {
+				// if (pos.equals("VB") || pos.equals("VBD") || pos.equals("VBN") || pos.equals("VBP") || pos.equals("VBZ") &&
+					// ( subjectVerbs.contains(toAdd) )) {
+					// check if previous token is subject
+					if (j == 0 && !pos.equals("VBG")) {
+						toAdd = "He " + toAdd;
+					} else if (j != 0) {
+						String prevPos = sentencePos[j-1].substring(sentencePos[j-1].indexOf('_')+1);
+						if (!prevPos.equals("NN") && !prevPos.equals("NNS") && !prevPos.equals("PRP") && !prevPos.equals("PRP$") && 
+							(!exceptions.contains(tokens[j-1]))) {
+							System.out.println(prevPos + "\n");
+							toAdd = " he " + toAdd;
+						}
+					}
+				}
+				newSentence += (toAdd + " ");
+			}
+			newTranslations.add(newSentence);
+			}
+		return newTranslations;
+	}
+
+	private static void outputToFile(List<String> translations, String outputFile) {
+		PrintWriter writer = null;
+		try {
+			writer = new PrintWriter(outputFile, "UTF-8");
+			for (String translation : translations) {
+				translation = translation.replaceAll(" ,", ",");
+				translation = translation.replaceAll("-", " ");
+				writer.println(translation);
+			}
+			writer.close();
+
+		} catch(FileNotFoundException f) {
+			System.out.println("no output file given!");
+			System.exit(1);
+		} catch(UnsupportedEncodingException e) {
+			System.out.println("zero f's given.");
+			System.exit(1);
+		}
+	}
+
+	//ARGUMENTS: corpus file, ngrams file, file to translate, output file
 	public static void main(String[] args) {
 		Translator t = new Translator();
 		String englishTaggerFile = "stanford-postagger-full/models/english-left3words-distsim.tagger";
@@ -366,8 +423,16 @@ public class Translator {
 		System.out.println("Tagging...");
 		translations = t.tagger(translations, englishTaggerFile);
 		translations = t.processPOS(translations, newSpanishTagged, positions);
+
+		List<String> englishTagged = t.tagger(translations, englishTaggerFile);
+		translations = t.addSubjects(translations, englishTagged);
+
+		outputToFile(translations, args[3]);
+
 		System.out.println("Final translations:");
 		for (String translation : translations) {
+			char upper = Character.toUpperCase(translation.charAt(0));
+			translation = upper + translation.substring(1);
 			translation = translation.replaceAll(" ,", ",");
 			translation = translation.replaceAll("-", " ");
 			System.out.println(translation);

@@ -52,3 +52,27 @@ por lo general
 generally
 de una manera
 in-a-manner
+tener que
+must
+hay que
+it-is-necessary-to
+hacer preguntas
+ask-questions
+hacer-trampa
+cheat
+hacer-una-visita
+pay-a-visit
+hacer presente
+remind
+hace frío
+it-is-cold
+hace calor
+it-is-hot
+hacer una pregunta
+ask-a-question
+hacer daño
+harm
+tener ganas de
+feel-like
+tener hambre
+hungry

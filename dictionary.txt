@@ -452,8 +452,8 @@ curiosa
 curious
 2
 relámpago
-lightning
-flash
+lightning-bolt
+flash of lightning
 3
 aquél
 that

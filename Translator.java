@@ -16,8 +16,8 @@ import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 
 public class Translator {
 
-	private static String TAGGER_FILE_ENG = "stanford-postagger-full/models/english-left3words-distsim.tagger";
-	private static String TAGGER_FILE_SPA = "stanford-postagger-full/models/spanish-distsim.tagger";
+	private static final String TAGGER_FILE_ENG = "stanford-postagger-full-2015-01-30/models/english-left3words-distsim.tagger";
+	private static final String TAGGER_FILE_SPA = "stanford-postagger-full-2015-01-30/models/spanish-distsim.tagger";
 	private Map<String, List<String>> dictionaryMap = new HashMap<String, List<String>>();
 	private Map<String, Double> dictionaryFreqs = new HashMap<String, Double>(); 
 	private	static List<String> subjectVerbs = new ArrayList<String>(Arrays.asList("are", "is", "had", "have", "were", "was", "am", "has", "should", "must", "could", "would"));
@@ -125,7 +125,7 @@ public class Translator {
 			while(true) {
 				String line = br.readLine();
 				if (line == null) break;
-				line = line.toLowerCase();
+				//line = line.toLowerCase();
 				char firstLetter = Character.toLowerCase(line.charAt(0));
 				line = firstLetter + line.substring(1);
 				sentences.add(line);
@@ -189,7 +189,7 @@ public class Translator {
 			if(dictionaryMap.get(tokens[i]) != null) {
 				for(String transWord : dictionaryMap.get(tokens[i])) {
 					if(dictionaryFreqs.get(transWord) == null) {
-						System.out.println("No freq count for " + transWord);
+						// System.out.println("No freq count for " + transWord);
 						continue;
 					}
 					if(dictionaryFreqs.get(transWord) > value) {
@@ -231,38 +231,97 @@ public class Translator {
 		return toReturn;
 	}
 
-	private String checkPos(String pos, int index, String spanishSentence) {
-		if (posBad(pos, index, spanishSentence)) {
-			return fixPos(pos);
-		}
-		return pos;
+	private int numSyllables(String word) {
+	    int count = 0;
+	    word = word.toLowerCase();
+	    for (int i = 0; i < word.length(); i++) {
+	        if (word.charAt(i) == '\"' || word.charAt(i) == '\'' || word.charAt(i) == '-' || word.charAt(i) == ',' || word.charAt(i) == ')' || word.charAt(i) == '(') {
+	            word = word.substring(0,i)+word.substring(i+1, word.length());
+	        }
+	    }
+	    boolean isPrevVowel = false;
+	    for (int j = 0; j < word.length(); j++) {
+	        if (word.contains("a") || word.contains("e") || word.contains("i") || word.contains("o") || word.contains("u")) {
+	            if (isVowel(word.charAt(j)) && !((word.charAt(j) == 'e') && (j == word.length()-1))) {
+	                if (isPrevVowel == false) {
+	                    count++;
+	                    isPrevVowel = true;
+	                }
+	            } else {
+	                isPrevVowel = false;
+	            }
+	        } else {
+	            count++;
+	            break;
+	        }
+	    }
+	    return count;
 	}
 
-	private boolean posBad(String pos, int index, String spanishSentence) {
-		// System.out.println(spanishSentence);
-		// System.out.println(index);
-		String[] spanish = spanishSentence.split("\\s+");
-		// System.out.println(spanish[index]);
-		String spPos = spanish[index].substring(spanish[index].indexOf('_')+1);
+	private boolean isVowel(char c) {
+        return "aeiou".indexOf(c) > -1;
+    }
 
-		if (pos.equals("NN") || pos.equals("NNS")) {
-			if (!spPos.equals("NOUN")) return true;
+    private String getNewAdj(String word, int syl, String type) {
+    	if (type.equals("more") || type.equals("More")) {
+    		if (syl == 2) {
+    			word = word.substring(0, word.length()-1) + "ier";
+    		}else if (word.charAt(word.length() - 1) == 'e') {
+    			word += "r";
+    		}else if (!isVowel(word.charAt(word.length() - 1)) && isVowel(word.charAt(word.length() - 2))) {
+    			word += word.charAt(word.length() - 1) + "er";
+    		}else {
+    			word += "er";
+    		}
+    	}else {
+    		if (syl == 2) {
+    			word = word.substring(0, word.length()-1) + "iest";
+    		}else if (word.charAt(word.length() - 1) == 'e') {
+    			word += "st";
+    		}else if (!isVowel(word.charAt(word.length() - 1)) && isVowel(word.charAt(word.length() - 2))) {
+    			word += word.charAt(word.length() - 1) + "est";
+    		}else {
+    			word += "est";
+    		}
+    	}
+    	return word;
+    }
+
+	public List<String> superlatives(List<String> old) {
+		List<String> translations = new ArrayList<String>();
+		for (String s: old) {
+			 translations.add(s.replaceAll("-", " "));
 		}
-
-		if (pos.equals("JJ")) {
-			if (!spPos.equals("ADJ")) return true;
+		List<String> tagged = tagger(translations, TAGGER_FILE_ENG);
+		List<String> fixed = new ArrayList<String>();
+		for (int x = 0; x < translations.size(); x++) {
+			String[] tokens = translations.get(x).split(" ");
+			String[] tagTokens = tagged.get(x).split(" ");
+			String merged = "";
+			for (int i = 0; i < tokens.length; i++) {
+				boolean added = false;
+				if (i != tokens.length - 1 && (tokens[i].equals("more") || tokens[i].equals("More") || tokens[i].equals("most") || tokens[i].equals("Most"))) {
+					String posNext = tagTokens[i+1].substring(tagTokens[i+1].indexOf("_") + 1);
+					if (posNext.equals("JJ")) {
+						int syl = numSyllables(tokens[i+1]);
+						if (syl == 1 || (syl == 2 && tokens[i+1].charAt(tokens[i+1].length() - 1) == 'y')) {
+							String append = getNewAdj(tokens[i+1], syl, tokens[i]);
+							merged += append + " ";
+							added = true;
+						}
+					}
+				}
+				if (added) {
+					i++;
+				}else {
+					merged += tokens[i] + " ";
+				}
+			}
+			fixed.add(merged);
 		}
-
-		return false;
+		return fixed;
 	}
 
-	private String fixPos(String pos) {
-		if (pos.equals("JJ")) {
-			return "NN";
-		}else {
-			return "JJ";
-		}
-	}
 
 	private String getTag(String alreadyTaggedStr) {
 		return alreadyTaggedStr.substring(alreadyTaggedStr.indexOf('_')+1).trim();
@@ -286,6 +345,7 @@ public class Translator {
 				if((!pos.equals("NN") && !pos.equals("NNS")) || (i == tagTokens.length-1)) {
 					finalStr += actualWord + " ";
 				} else {
+					System.out.println("Noun: " + actualWord);
 					String posNext = tagTokens[i+1].substring(tagTokens[i+1].indexOf('_')+1);
 					if(posNext.equals("JJ")) {
 						int numChanged = 1;
@@ -296,6 +356,7 @@ public class Translator {
 							if(!posNextNext.equals("JJ") && !posNextNext.equals("CC"))
 								break;
 							String nextActualWord = tagTokens[i+numChanged].substring(0, tagTokens[i+numChanged].indexOf('_'));
+							System.out.println("Next: " + nextActualWord);
 							if(posNextNext.equals("CC")) {
 								if(nextActualWord.equals("for") || nextActualWord.equals("so"))
 									break;
@@ -403,7 +464,7 @@ public class Translator {
 		return translationsToReturn;
 	}
 
-	public List<String> possesions(List<String> oldTranslations) {
+	public List<String> possessions(List<String> oldTranslations) {
 		MaxentTagger tagger = new MaxentTagger(TAGGER_FILE_ENG);
 		List<String> toReturn = new ArrayList<String>();
 		Pattern possessionPattern = Pattern.compile("the ((\\w+) of the (\\w+))");
@@ -436,17 +497,86 @@ public class Translator {
 			String[] tokens = englishTagged.get(x).split("\\s+");
 			String newSentence = "";
 			for (int i = 0; i < tokens.length; i++) {
+				String originalToken = getWord(tokens[i]) + " ";
+				String changedInfinitive = "";
+				boolean addedTo = false;
+				boolean changedOf = false;
 				if (i <= tokens.length - 2) {
 					String word1Tag = getTag(tokens[i]);
 					String word2Tag = getTag(tokens[i+1]);
 					// System.out.println(getWord(tokens[i]) + ":" + word1Tag);
 					// System.out.println(getWord(tokens[i+1]) + ":" + word2Tag);
 					if(word1Tag.equals("VBD") && (word2Tag.equals("VBN") || word2Tag.equals("VB")) && !subjectVerbs.contains(getWord(tokens[i])) ) {
-						newSentence += getWord(tokens[i]) + " to " + getWord(tokens[i+1]) + " ";
-					} else {
-						newSentence += getWord(tokens[i]) + " " + getWord(tokens[i+1]) + " ";
+						changedInfinitive = getWord(tokens[i]) + " to " + getWord(tokens[i+1]) + " ";
+						addedTo = true;
+						i += 1;
+					} 
+				} 
+
+				// check for form VERB of VERB
+				if (i <= tokens.length - 3) {
+					String word1Tag = getTag(tokens[i]);
+					String word2 = getWord(tokens[i+1]);
+					String word3Tag = getTag(tokens[i+2]);
+					// System.out.println(getWord(tokens[i]) + ":" + word1Tag);
+					// System.out.println(getWord(tokens[i+1]) + ":" + getTag(tokens[i+1]));
+					// System.out.println(getWord(tokens[i+2]) + ":" + word3Tag);
+					if (word1Tag.equals("VBD") && (word3Tag.equals("VBN") || word3Tag.equals("VB") || word3Tag.equals("VBP")) 
+						&& !subjectVerbs.contains(getWord(tokens[i])) && word2.equals("of")) {
+						changedInfinitive = getWord(tokens[i]) + " to " + getWord(tokens[i+2]) + " ";
+						changedOf = true;
+						i += 2;
 					}
-					i+=1;
+				} 
+				if (!addedTo && !changedOf) {
+					changedInfinitive += originalToken;
+				}
+				newSentence += changedInfinitive;
+			}
+			toReturn.add(newSentence);
+		}
+		return toReturn;
+	}
+
+	public List<String> negationFix(List<String> prevTranslations) {
+		List<String> reTag = new ArrayList<String>();
+		for (String s: prevTranslations) {
+			 reTag.add(s.replaceAll("-", " "));
+		}
+		List<String> englishTagged = tagger(reTag, TAGGER_FILE_ENG);
+		List<String> toReturn = new ArrayList<String>();
+		List<String> translationsToReturn = new ArrayList<String>();
+		for (int x = 0; x < englishTagged.size(); x++) {
+			String[] tokens = englishTagged.get(x).split("\\s+");
+			String newSentence = "";
+			for (int i = 0; i < tokens.length; i++) {
+				if (i <= tokens.length - 2) {
+					String word1Tag = getTag(tokens[i]);
+					String word2 = getWord(tokens[i+1]);
+					if ((word2.equals("not") || word2.equals("no")) && word1Tag.charAt(0) != 'V') {
+						int numMoved = 2;
+						String tagCheck = getTag(tokens[i+1]);
+						String move = getWord(tokens[i]) + " ";
+						String notMoved= getWord(tokens[i]) + " " + getWord(tokens[i+1]) + " ";
+						while (tagCheck.charAt(0) != 'V' && (i + numMoved) < tokens.length) {
+							tagCheck = getTag(tokens[i+numMoved]);
+							move += getWord(tokens[i+numMoved]) + " ";
+							notMoved += getWord(tokens[i+numMoved]) + " ";
+							if (tagCheck.charAt(0) == 'V'){
+								move += "not ";
+								break;
+							}
+							numMoved++;
+						}
+						if (i + numMoved == tokens.length -1) {
+							newSentence += notMoved;
+						} else {
+							newSentence += move;
+						}
+						i += numMoved;
+					} else {
+						newSentence += getWord(tokens[i]) + " ";
+					}
 				} else {
 					newSentence += getWord(tokens[i]) + " ";
 				}
@@ -454,7 +584,7 @@ public class Translator {
 			toReturn.add(newSentence);
 		}
 		return toReturn;
-	}
+	} 
 
 	private static void outputToFile(List<String> translations, String outputFile) {
 		PrintWriter writer = null;
@@ -492,17 +622,24 @@ public class Translator {
 
 		System.out.println("We're done translating!");
 		System.out.println("Tagging...");
+
+		translations = t.superlatives(translations);
+
 		translations = t.tagger(translations, TAGGER_FILE_ENG);
 		translations = t.processPOS(translations);
 
 		List<String> englishTagged = t.tagger(translations, TAGGER_FILE_ENG);
 		translations = t.addSubjects(translations, englishTagged);
 		//magic happens here
+		englishTagged = t.tagger(translations, TAGGER_FILE_ENG);
 		translations = t.pronounAgreement(translations);
-		translations = t.possesions(translations);
+
+		englishTagged = t.tagger(translations, TAGGER_FILE_ENG);
+		translations = t.possessions(translations);
 
 		// List<String> englishTagged_new = t.tagger(translations, TAGGER_FILE_ENG);
 		translations = t.infinitiveVerbs(translations);
+		translations = t.negationFix(translations);
 
 		outputToFile(translations, args[3]);
 

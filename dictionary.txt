@@ -1,18 +1,19 @@
 1
-él 
+él
 he
 4
 que
-what 
-that 
+what
+that
 than
 who
 1
 lee
 reads
-2
-mucho 
-much 
+3
+mucho
+much
+lot
 a lot
 1
 y
@@ -28,7 +29,7 @@ sees
 looks
 views
 3
-sabe ***
+sabe
 knows
 is conscious of
 realizes
@@ -36,7 +37,7 @@ realizes
 París
 Paris
 4
-es ***
+es
 is
 it is
 this is
@@ -159,12 +160,11 @@ waiting
 expecting
 waited
 expected
-5
+4
 en
 in
 on
 at
-to
 into
 3
 habitual
@@ -254,11 +254,10 @@ headed
 sonrisa
 smile
 grin
-5
+4
 a
 to
 at
-of
 into
 by
 1
@@ -518,17 +517,16 @@ slumber
 tenido
 had
 held
-3
+5
 tenía
 had
 he had
 he was
 she had
 she was
-3
+1
 cara
 face
-look
 3
 grande
 large
@@ -565,10 +563,9 @@ watery
 abundante
 abundant
 plenty of
-2
+1
 rubio
 blond
-fair
 2
 cubría
 covered
@@ -614,11 +611,10 @@ because of
 1
 supuesto
 supposed
-3
+2
 prohibido
 prohibited
 forbidden
-restricted
 3
 hacer
 do
@@ -741,9 +737,9 @@ bulky
 hefty
 4
 hecho
-made 
-complete 
-taken 
+made
+complete
+taken
 fact
 1
 pergamino

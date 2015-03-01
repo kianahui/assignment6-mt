@@ -17,7 +17,7 @@ import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 public class Translator {
 
 	private static final String TAGGER_FILE_ENG = "stanford-postagger-full-2015-01-30/models/english-left3words-distsim.tagger";
-	private static final String TAGGER_FILE_SPA = "stanford-postagger-full-2015-01-30/models/spanish-distsim.tagger";
+	// private static final String TAGGER_FILE_SPA = "stanford-postagger-full-2015-01-30/models/spanish-distsim.tagger";
 	private Map<String, List<String>> dictionaryMap = new HashMap<String, List<String>>();
 	private Map<String, Double> dictionaryFreqs = new HashMap<String, Double>(); 
 	private	static List<String> subjectVerbs = new ArrayList<String>(Arrays.asList("are", "is", "had", "have", "were", "was", "am", "has", "should", "must", "could", "would"));
@@ -587,8 +587,9 @@ public class Translator {
 	public static void main(String[] args) {
 		Translator t = new Translator();
 
-		t.buildDictionary(args[0], args[1]);
-		List<String> translations = t.translate(args[2]);
+		// t.buildDictionary(args[0], args[1]);
+		t.buildDictionary("dictionary.txt", "ngrams.txt");
+		List<String> translations = t.translate(args[0]);
 
 		System.out.println("We're done translating!");
 		System.out.println("Tagging...");
@@ -610,7 +611,7 @@ public class Translator {
 		translations = t.infinitiveVerbs(translations);
 		translations = t.negationFix(translations);
 
-		outputToFile(translations, args[3]);
+		outputToFile(translations, args[1]);
 
 		System.out.println("Final translations:");
 		for (String translation : translations) {
@@ -624,5 +625,4 @@ public class Translator {
 		}
 		System.out.println("--------");
 	}
-
 }

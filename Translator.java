@@ -108,15 +108,7 @@ public class Translator {
 		return newSentences;
 	}
 
-	public List<String> spanishPOS(List<String> sentences) {
-		List<String> spanishTaggedSentences = tagger(sentences, TAGGER_FILE_SPA);
-		// for(String s: spanishTaggedSentences) {
-		// 	System.out.println("..." + s);
-		// }
-		return spanishTaggedSentences;
-	}
-
-	public List<String> translate(String fileStr, List<String> newSpanishTagged) {
+	public List<String> translate(String fileStr) {
 		List<String> sentences = new ArrayList<String>();
 		List<String> translations = new ArrayList<String>();
 		BufferedReader br = null;
@@ -140,10 +132,9 @@ public class Translator {
 		}
 
 		List<String> phrasesReplaced = phraseReplace(newSentences, "phrases.txt");
-		List<String> spanishTaggedSentences = spanishPOS(phrasesReplaced);
 		for(int i = 0; i < sentences.size(); i++) {
 			// System.out.println(spanishTaggedSentences.get(i));
-			translations.add(translateLineSpanEng(phrasesReplaced.get(i), spanishTaggedSentences.get(i), newSpanishTagged));
+			translations.add(translateLineSpanEng(phrasesReplaced.get(i)));
 		}
 		return translations;
 	}
@@ -160,26 +151,13 @@ public class Translator {
 		}
 	}
 
-	public String translateLineSpanEng(String spReg, String spTagged, List<String> newSpanishTagged) {
-		// System.out.println(spReg);
-		// System.out.println(spTagged);
-		// System.out.println("-----");
+	public String translateLineSpanEng(String spReg) {
 		List<String> finalTranslation = new ArrayList<String>();
-		//remove punctuation
 		String[] tokens = spReg.replaceAll("[.]", "").split("\\s+");
 		// System.out.println(tokens.length);
-		String[] taggedTokens = spTagged.replaceAll("[.]","").split("\\s+");
 		String spanishSentence = "";
 		for(int i = 0; i < tokens.length; i++) {
-			// System.out.println("Spanish Tagged: " + taggedTokens[i]);
-			String extractedTag = taggedTokens[i].substring(taggedTokens[i].indexOf('_')+1);
-			String newSpTagged = taggedTokens[i].substring(0, taggedTokens[i].indexOf('_')) + convertPOS(extractedTag);
-			spanishSentence += newSpTagged + " ";
-			// System.out.println(taggedTokens[i]);
-			// System.out.println(newSpTagged);
-			// System.out.println(extractedTag);
 			boolean hasComma = false;
-			// String mostLikelyTrans = "??";
 			String mostLikelyTrans = tokens[i];
 			double value = 0.0;
 			if(tokens[i].contains(",")) {
@@ -189,7 +167,6 @@ public class Translator {
 			if(dictionaryMap.get(tokens[i]) != null) {
 				for(String transWord : dictionaryMap.get(tokens[i])) {
 					if(dictionaryFreqs.get(transWord) == null) {
-						// System.out.println("No freq count for " + transWord);
 						continue;
 					}
 					if(dictionaryFreqs.get(transWord) > value) {
@@ -203,16 +180,13 @@ public class Translator {
 					String secondWord = "e" + tokens[i].substring(tokens[i].indexOf('l'));
 					mostLikelyTrans = dictionaryMap.get(firstWord).get(0) + " " + dictionaryMap.get(secondWord).get(0);
 				} else
-				// mostLikelyTrans = "??";
-				mostLikelyTrans = tokens[i];
+					mostLikelyTrans = tokens[i];
 			}
 			finalTranslation.add(mostLikelyTrans);
 			if(hasComma) {
 				finalTranslation.add(",");
 			}
 		}
-		newSpanishTagged.add(spanishSentence);
-		// allPositions.add(positions);
 		String toReturn = "";
 		for(String token : finalTranslation) {
 			toReturn += token + " ";
@@ -225,7 +199,6 @@ public class Translator {
 		List<String> toReturn = new ArrayList<String>();
 		for(String sentence : sentences) {
 			String taggedSentence = tagger.tagTokenizedString(sentence);
-    		// System.out.println(taggedSentence);
 			toReturn.add(taggedSentence);
 		}
 		return toReturn;
@@ -345,7 +318,7 @@ public class Translator {
 				if((!pos.equals("NN") && !pos.equals("NNS")) || (i == tagTokens.length-1)) {
 					finalStr += actualWord + " ";
 				} else {
-					System.out.println("Noun: " + actualWord);
+					// System.out.println("Noun: " + actualWord);
 					String posNext = tagTokens[i+1].substring(tagTokens[i+1].indexOf('_')+1);
 					if(posNext.equals("JJ")) {
 						int numChanged = 1;
@@ -356,7 +329,7 @@ public class Translator {
 							if(!posNextNext.equals("JJ") && !posNextNext.equals("CC"))
 								break;
 							String nextActualWord = tagTokens[i+numChanged].substring(0, tagTokens[i+numChanged].indexOf('_'));
-							System.out.println("Next: " + nextActualWord);
+							// System.out.println("Next: " + nextActualWord);
 							if(posNextNext.equals("CC")) {
 								if(nextActualWord.equals("for") || nextActualWord.equals("so"))
 									break;
@@ -553,16 +526,16 @@ public class Translator {
 				if (i <= tokens.length - 2) {
 					String word1Tag = getTag(tokens[i]);
 					String word2 = getWord(tokens[i+1]);
-					if ((word2.equals("not") || word2.equals("no")) && word1Tag.charAt(0) != 'V') {
+					if ((word2.equals("not") || word2.equals("no")) && word1Tag.charAt(0) != 'V' && !word1Tag.equals("MD")) {
 						int numMoved = 2;
 						String tagCheck = getTag(tokens[i+1]);
 						String move = getWord(tokens[i]) + " ";
 						String notMoved= getWord(tokens[i]) + " " + getWord(tokens[i+1]) + " ";
-						while (tagCheck.charAt(0) != 'V' && (i + numMoved) < tokens.length) {
+						while (tagCheck.charAt(0) != 'V' && !tagCheck.equals("MD") && (i + numMoved) < tokens.length) {
 							tagCheck = getTag(tokens[i+numMoved]);
 							move += getWord(tokens[i+numMoved]) + " ";
 							notMoved += getWord(tokens[i+numMoved]) + " ";
-							if (tagCheck.charAt(0) == 'V'){
+							if (tagCheck.charAt(0) == 'V' || tagCheck.equals("MD")){
 								move += "not ";
 								break;
 							}
@@ -602,7 +575,7 @@ public class Translator {
 			writer.close();
 
 		} catch(FileNotFoundException f) {
-			System.out.println("no output file given!");
+			System.out.println("No output file given!");
 			System.exit(1);
 		} catch(UnsupportedEncodingException e) {
 			System.out.println("Encoding not supported.");
@@ -613,12 +586,9 @@ public class Translator {
 	//ARGUMENTS: corpus file, ngrams file, file to translate, output file
 	public static void main(String[] args) {
 		Translator t = new Translator();
-		// String englishTaggerFile = "stanford-postagger-full/models/english-left3words-distsim.tagger";
-		// String spanishTaggerFile = "stanford-postagger-full/models/spanish-distsim.tagger";
 
 		t.buildDictionary(args[0], args[1]);
-		List<String> newSpanishTagged = new ArrayList<String>();
-		List<String> translations = t.translate(args[2], newSpanishTagged);
+		List<String> translations = t.translate(args[2]);
 
 		System.out.println("We're done translating!");
 		System.out.println("Tagging...");
@@ -630,14 +600,13 @@ public class Translator {
 
 		List<String> englishTagged = t.tagger(translations, TAGGER_FILE_ENG);
 		translations = t.addSubjects(translations, englishTagged);
-		//magic happens here
+
 		englishTagged = t.tagger(translations, TAGGER_FILE_ENG);
 		translations = t.pronounAgreement(translations);
 
 		englishTagged = t.tagger(translations, TAGGER_FILE_ENG);
 		translations = t.possessions(translations);
 
-		// List<String> englishTagged_new = t.tagger(translations, TAGGER_FILE_ENG);
 		translations = t.infinitiveVerbs(translations);
 		translations = t.negationFix(translations);
 
